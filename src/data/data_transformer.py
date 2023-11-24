@@ -5,6 +5,11 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class DataTransformer(BaseEstimator, TransformerMixin):
+    """
+    Данный класс используется для преобразования сырого набора данных в датасет,
+    используемый при тренировке и в инференсе
+    """
+
     def __init__(self, is_train=True):
         self.is_train = is_train
 
@@ -19,7 +24,6 @@ class DataTransformer(BaseEstimator, TransformerMixin):
         ).dt.days
 
         if self.is_train == True:
-            # median_zero_target = X[X['buy_post'] == 0]['MaxMinDelta'].median()
             X['date_diff_post'].fillna(
                 value=0,
                 inplace=True
@@ -49,33 +53,6 @@ class DataTransformer(BaseEstimator, TransformerMixin):
         X['FavoriteHour'] = X.groupby('customer_id')['hour'].transform(lambda x: x.value_counts().index[0])
 
         X['MostVisitedFormat'] = X.groupby('customer_id')['format_name'].transform(lambda x: x.value_counts().index[0])
-
-        is_food_court_dict = {
-            0: 0,
-            1: 0,
-            2: 1,
-            3: 0,
-            4: 1,
-            5: 0,
-            6: 0,
-            7: 0,
-            8: 0
-        }
-
-        is_toilet_dict = {
-            0: 1,
-            1: 1,
-            2: 0,
-            3: 0,
-            4: 1,
-            5: 0,
-            6: 1,
-            7: 0,
-            8: 0
-        }
-
-        X['is_food_court'] = X['MostVisitedFormat'].replace(is_food_court_dict)
-        X['is_toilet'] = X['MostVisitedFormat'].replace(is_toilet_dict)
 
         X.drop(['format_name', 'OrderPrice', 'hour', 'minute', 'ownareaall_sqm'], axis=1, inplace=True)
         X.drop_duplicates(
